@@ -1,0 +1,24 @@
+packageManager: npm
+registry: https://registry.npmjs.org/
+# jsonUpgraded: true
+interactive: true
+# greatest: true
+upgrade: true
+# newest: true
+timeout: 300000
+reject:
+  # eslint@8.x
+  - eslint
+
+  # webpack@5.x
+  - sass-loader
+
+  # ESM module
+  - swiper
+  - chalk
+  - execa
+  - globby
+  - p-limit
+  - screenfull
+  - public-ip
+  - internal-ip

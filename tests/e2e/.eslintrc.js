@@ -1,10 +1,10 @@
 module.exports = {
-  plugins: ["wdio"],
-  extends: "plugin:wdio/recommended",
+  plugins: ['wdio'],
+  extends: 'plugin:wdio/recommended',
   env: {
-    mocha: true,
+    mocha: true
   },
   rules: {
-    strict: "off",
-  },
-};
+    strict: 'off'
+  }
+}
