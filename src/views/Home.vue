@@ -11,10 +11,11 @@ import { defineComponent } from 'vue'
 
 import HelloWorld from '@/components/HelloWorld.vue' // @ is an alias to /src
 
-// import * as b from 'baidu-aip-sdk'
 import * as t from 'tencentcloud-sdk-nodejs'
 
-// console.log(b)
+console.log(process.env.ELECTRON_NODE_INTEGRATION, process.env.IS_TEST, process.env.NODE_ENV)
+/* eslint-disable-next-line @typescript-eslint/no-var-requires */
+console.log(require('baidu-aip-sdk'))
 console.log(t)
 
 export default defineComponent({

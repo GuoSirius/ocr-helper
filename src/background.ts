@@ -1,6 +1,6 @@
 'use strict'
 
-import { initialize } from '@electron/remote/main'
+import { enable, initialize } from '@electron/remote/main'
 import { app, protocol, BrowserWindow } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
@@ -15,20 +15,32 @@ protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: tru
 async function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
+    title: 'OCR Helper',
     width: 800,
     height: 600,
     useContentSize: true,
     autoHideMenuBar: true,
     webPreferences: {
       // Required for Spectron testing
-      enableRemoteModule: !!process.env.IS_TEST,
+      enableRemoteModule: true, // !!process.env.IS_TEST,
 
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION as unknown as boolean,
-      contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION
+      nodeIntegration: true, // process.env.ELECTRON_NODE_INTEGRATION as unknown as boolean,
+      nodeIntegrationInWorker: true,
+      nodeIntegrationInSubFrames: true,
+      webSecurity: false,
+      allowRunningInsecureContent: true,
+      plugins: true,
+      webviewTag: true,
+      scrollBounce: true,
+      autoplayPolicy: 'no-user-gesture-required',
+      experimentalFeatures: true,
+      contextIsolation: false // !process.env.ELECTRON_NODE_INTEGRATION
     }
   })
+
+  enable(win.webContents)
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
