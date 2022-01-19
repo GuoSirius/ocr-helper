@@ -7,6 +7,8 @@ upgrade: true
 # newest: true
 timeout: 300000
 reject:
+  - electron # @13.6.6
+
   # eslint@8.x
   - eslint
 
