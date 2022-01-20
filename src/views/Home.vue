@@ -11,12 +11,14 @@ import { defineComponent } from 'vue'
 
 import HelloWorld from '@/components/HelloWorld.vue' // @ is an alias to /src
 
-import * as t from 'tencentcloud-sdk-nodejs'
+import * as tencentcloud from 'tencentcloud-sdk-nodejs'
+import '@/electron/ocr'
+import '@/electron/ocr/Tencent'
 
 console.log(process.env.ELECTRON_NODE_INTEGRATION, process.env.IS_TEST, process.env.NODE_ENV)
 /* eslint-disable-next-line @typescript-eslint/no-var-requires */
 console.log(require('baidu-aip-sdk'))
-console.log(t)
+console.log(tencentcloud)
 
 export default defineComponent({
   name: 'Home',

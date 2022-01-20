@@ -23,6 +23,10 @@ module.exports = {
     electronBuilder: {
       nodeIntegration: true,
       removeElectronJunk: false,
+      // Manually disable typescript plugin for main process. Enable if you want to use regular js for the main process (src/background.js by default).
+      // disableMainProcessTypescript: false,
+      // Manually enable type checking during webpack bundling for background file.
+      // mainProcessTypeChecking: false,
       // List native deps here if they don't work
       externals: ['baidu-aip-sdk'],
       // If you are using Yarn Workspaces, you may have multiple node_modules folders

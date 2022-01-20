@@ -4,7 +4,7 @@ import { enable, initialize } from '@electron/remote/main'
 import { app, protocol, BrowserWindow } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
-import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
+// import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 initialize()
@@ -18,6 +18,8 @@ async function createWindow() {
     title: 'OCR Helper',
     width: 800,
     height: 600,
+    show: false,
+    paintWhenInitiallyHidden: true,
     useContentSize: true,
     autoHideMenuBar: true,
     webPreferences: {
@@ -42,6 +44,10 @@ async function createWindow() {
   })
 
   enable(win.webContents)
+
+  win.once('ready-to-show', () => {
+    win.show()
+  })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -77,7 +83,7 @@ app.on('ready', async () => {
   if (isDevelopment && !process.env.IS_TEST) {
     // Install Vue Devtools
     try {
-      await installExtension(VUEJS3_DEVTOOLS)
+      // await installExtension(VUEJS3_DEVTOOLS)
     } catch (e) {
       console.error('Vue Devtools failed to install:', e.toString())
     }
