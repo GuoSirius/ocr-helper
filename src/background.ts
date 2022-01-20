@@ -35,6 +35,7 @@ async function createWindow() {
       webviewTag: true,
       scrollBounce: true,
       autoplayPolicy: 'no-user-gesture-required',
+      defaultEncoding: 'utf-8',
       experimentalFeatures: true,
       contextIsolation: false // !process.env.ELECTRON_NODE_INTEGRATION
     }
