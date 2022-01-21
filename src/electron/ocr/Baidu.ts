@@ -26,8 +26,6 @@ export default class Baidu implements IOCR {
 
     const options = { probability: 'true', detect_direction: 'true' }
 
-    // return Promise.resolve({ text: base64 })
-
     return ocrClient.accurateBasic(base64, options).then((result: IBaiduOCRResult) => {
       const { words } = result
 

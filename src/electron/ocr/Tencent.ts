@@ -1,14 +1,20 @@
 import { ocr } from 'tencentcloud-sdk-nodejs'
 
+import { nanoid } from 'nanoid'
+
 import IOCR from './IOCR'
 
 import { TENCENT_API_KEY, TENCENT_SECRET_KEY } from './constant'
+
+export type SignMethod = 'HmacSHA256' | 'TC3-HMAC-SHA256' | 'HmacSHA1' | undefined
+export type ReqMethod = 'POST' | 'GET' | undefined
 
 const { v20181119 } = ocr
 const { Client } = v20181119
 
 export default class Tencent implements IOCR {
-  ocrClient = null
+  // @ts-expect-error typeof
+  ocrClient: Client
 
   constructor() {
     const clientConfig = {
@@ -18,9 +24,9 @@ export default class Tencent implements IOCR {
         secretKey: TENCENT_SECRET_KEY
       },
       profile: {
-        signMethod: 'HmacSHA256',
+        signMethod: 'HmacSHA256' as SignMethod,
         httpProfile: {
-          reqMethod: 'POST',
+          reqMethod: 'POST' as ReqMethod,
           reqTimeout: 30
         }
       }
@@ -32,7 +38,10 @@ export default class Tencent implements IOCR {
   }
 
   recognize(base64: string) {
-    // GeneralAccurateOCR
-    return Promise.resolve({ text: base64 })
+    const { ocrClient } = this
+
+    const options = { SessionId: nanoid(), ImageBase64: base64 }
+
+    return ocrClient.GeneralAccurateOCR(options)
   }
 }
