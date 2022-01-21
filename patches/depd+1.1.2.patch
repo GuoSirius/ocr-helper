@@ -1,0 +1,25 @@
+diff --git a/node_modules/depd/index.js b/node_modules/depd/index.js
+index d758d3c..0586c85 100644
+--- a/node_modules/depd/index.js
++++ b/node_modules/depd/index.js
+@@ -107,16 +107,16 @@ function depd (namespace) {
+     throw new TypeError('argument namespace is required')
+   }
+ 
+-  var stack = getStack()
+-  var site = callSiteLocation(stack[1])
+-  var file = site[0]
++  // var stack = getStack()
++  // var site = callSiteLocation(stack[1])
++  // var file = site[0]
+ 
+   function deprecate (message) {
+     // call to self as log
+     log.call(deprecate, message)
+   }
+ 
+-  deprecate._file = file
++  // deprecate._file = file
+   deprecate._ignored = isignored(namespace)
+   deprecate._namespace = namespace
+   deprecate._traced = istraced(namespace)

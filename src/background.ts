@@ -1,13 +1,19 @@
 'use strict'
 
+import path from 'path'
+
 import { enable, initialize } from '@electron/remote/main'
 import { app, protocol, BrowserWindow } from 'electron'
+import ElectronStore from 'electron-store'
+import { is } from 'electron-util'
 import { autoUpdater } from 'electron-updater'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 // import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 initialize()
+registerProtocol()
+ElectronStore.initRenderer()
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: true, standard: true, stream: true } }])
@@ -19,6 +25,7 @@ async function createWindow() {
     width: 800,
     height: 600,
     show: false,
+    // frame: false,
     paintWhenInitiallyHidden: true,
     useContentSize: true,
     autoHideMenuBar: true,
@@ -59,6 +66,38 @@ async function createWindow() {
     win.loadURL('app://./index.html')
     autoUpdater.checkForUpdatesAndNotify()
   }
+
+  return win
+}
+
+function makeSingleInstance(mainWindow: BrowserWindow) {
+  if (is.development || process.mas || !(mainWindow instanceof BrowserWindow)) return
+
+  const gotLock = app.requestSingleInstanceLock()
+
+  if (gotLock) {
+    app.on('second-instance', (event, commandLine, workingDirectory) => {
+      if (mainWindow) {
+        if (mainWindow.isMinimized()) mainWindow.restore()
+
+        mainWindow.focus()
+      }
+    })
+  } else {
+    app.quit()
+  }
+}
+
+function registerProtocol() {
+  if (is.development || process.mas) return
+
+  if (process.defaultApp) {
+    if (process.argv.length >= 2) {
+      app.setAsDefaultProtocolClient('ocr-helper', process.execPath, [path.resolve(process.argv[1])])
+    }
+  } else {
+    app.setAsDefaultProtocolClient('ocr-helper')
+  }
 }
 
 // Quit when all windows are closed.
@@ -88,7 +127,9 @@ app.on('ready', async () => {
       console.error('Vue Devtools failed to install:', e.toString())
     }
   }
-  createWindow()
+
+  const mainWindow = await createWindow()
+  makeSingleInstance(mainWindow)
 })
 
 // Exit cleanly on request from parent process in development mode.

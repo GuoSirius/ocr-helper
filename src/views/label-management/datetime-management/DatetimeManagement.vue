@@ -1,11 +1,9 @@
 <template>
-  <div class="wrapper">OCR {{ a }}</div>
+  <div class="wrapper">DatetimeManagement</div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-
-const a = ref(0)
+// import { ref } from 'vue'
 </script>
 
 <style lang="scss" scoped>
