@@ -79,6 +79,22 @@ const routes: Array<RouteRecordRaw> = [
         }
       },
       {
+        path: 'punctuation-management',
+        name: 'punctuation-management',
+        component: () => import('@/views/label-management/punctuation-management/PunctuationManagement.vue'),
+        meta: {
+          title: '标点管理'
+        }
+      },
+      {
+        path: 'dictionary-management',
+        name: 'dictionary-management',
+        component: () => import('@/views/system-management/dictionary-management/DictionaryManagement.vue'),
+        meta: {
+          title: '字典管理'
+        }
+      },
+      {
         path: 'home',
         name: 'Home',
         component: Home,

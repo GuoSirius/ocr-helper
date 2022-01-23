@@ -11,8 +11,11 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 // import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
+let mainWindow: BrowserWindow
+
 initialize()
 registerProtocol()
+makeSingleInstance()
 ElectronStore.initRenderer()
 
 // Scheme must be registered before the app is ready
@@ -70,8 +73,20 @@ async function createWindow() {
   return win
 }
 
-function makeSingleInstance(mainWindow: BrowserWindow) {
-  if (is.development || process.mas || !(mainWindow instanceof BrowserWindow)) return
+function registerProtocol() {
+  if (is.development || process.mas) return
+
+  if (process.defaultApp) {
+    if (process.argv.length >= 2) {
+      app.setAsDefaultProtocolClient('ocr-helper', process.execPath, [path.resolve(process.argv[1])])
+    }
+  } else {
+    app.setAsDefaultProtocolClient('ocr-helper')
+  }
+}
+
+function makeSingleInstance() {
+  if (is.development || process.mas) return
 
   const gotLock = app.requestSingleInstanceLock()
 
@@ -88,18 +103,6 @@ function makeSingleInstance(mainWindow: BrowserWindow) {
   }
 }
 
-function registerProtocol() {
-  if (is.development || process.mas) return
-
-  if (process.defaultApp) {
-    if (process.argv.length >= 2) {
-      app.setAsDefaultProtocolClient('ocr-helper', process.execPath, [path.resolve(process.argv[1])])
-    }
-  } else {
-    app.setAsDefaultProtocolClient('ocr-helper')
-  }
-}
-
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
   // On macOS it is common for applications and their menu bar
@@ -109,10 +112,12 @@ app.on('window-all-closed', () => {
   }
 })
 
-app.on('activate', () => {
+app.on('activate', async () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  if (mainWindow === null) {
+    mainWindow = await createWindow()
+  }
 })
 
 // This method will be called when Electron has finished
@@ -128,8 +133,7 @@ app.on('ready', async () => {
     }
   }
 
-  const mainWindow = await createWindow()
-  makeSingleInstance(mainWindow)
+  mainWindow = await createWindow()
 })
 
 // Exit cleanly on request from parent process in development mode.

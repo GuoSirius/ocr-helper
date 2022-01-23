@@ -18,25 +18,22 @@ export default class Model extends CamoModel {
         unique: true,
         required: true
       },
-      isRegExp: {
-        type: Boolean,
-        default: false
+      tag: {
+        type: String,
+        unique: true,
+        required: true
       },
-      isSystem: {
-        type: Boolean,
-        default: false
+      tagPrefix: {
+        type: String,
+        default: '{{'
       },
-      createTime: {
-        type: Date,
-        default: Date.now
+      tagSeparator: {
+        type: String,
+        default: ':'
       },
-      updateTime: {
-        type: Date,
-        default: Date.now
-      },
-      deleteTime: {
-        type: Date,
-        default: null
+      tagSuffix: {
+        type: String,
+        default: '{{'
       }
     })
   }

@@ -11,7 +11,9 @@
       </div>
 
       <div class="header-right">
-        <el-icon title="标签管理" size="32px" @click.stop="labelHandler"><price-tag /></el-icon>
+        <el-icon title="主页管理" size="32px" @click.stop="shortcutHandler(HOME_NAME)"><home-filled /></el-icon>
+        <el-icon title="标签管理" size="32px" @click.stop="shortcutHandler(LABEL_NAME)"><price-tag /></el-icon>
+        <el-icon title="字典管理" size="32px" @click.stop="shortcutHandler(SETTINGS_NAME)"><setting /></el-icon>
       </div>
     </el-header>
 
@@ -32,7 +34,7 @@
             </el-menu-item>
 
             <el-menu-item index="/secret-management" :route="{ name: 'secret-management' }">
-              <el-icon><platform /></el-icon>
+              <el-icon><lock /></el-icon>
               <template #title>秘钥管理</template>
             </el-menu-item>
 
@@ -71,6 +73,23 @@
                 <el-icon><avatar /></el-icon>
                 <template #title>人名管理</template>
               </el-menu-item>
+
+              <el-menu-item index="/punctuation-management" :route="{ name: 'punctuation-management' }">
+                <el-icon><platform /></el-icon>
+                <template #title>标点管理</template>
+              </el-menu-item>
+            </el-sub-menu>
+
+            <el-sub-menu index="/system-management">
+              <template #title>
+                <el-icon><setting /></el-icon>
+                <span>系统管理</span>
+              </template>
+
+              <el-menu-item index="/dictionary-management" :route="{ name: 'dictionary-management' }">
+                <el-icon><tickets /></el-icon>
+                <template #title>字典管理</template>
+              </el-menu-item>
             </el-sub-menu>
           </el-menu>
         </el-scrollbar>
@@ -87,7 +106,7 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { LABEL_NAME } from './constant'
+import { HOME_NAME, LABEL_NAME, SETTINGS_NAME } from './constant'
 
 const route = useRoute()
 const router = useRouter()
@@ -98,8 +117,10 @@ function expandHandler() {
   isCollapsed.value = !isCollapsed.value
 }
 
-function labelHandler() {
-  router.push({ name: LABEL_NAME })
+function shortcutHandler(name) {
+  if (!name) return
+
+  router.push({ name })
 }
 </script>
 
@@ -139,6 +160,10 @@ function labelHandler() {
       & > * {
         display: inline-block;
         vertical-align: middle;
+
+        &:not(:last-child) {
+          margin-right: 16px;
+        }
       }
     }
   }

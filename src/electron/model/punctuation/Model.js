@@ -8,7 +8,7 @@ export default class Model extends CamoModel {
   }
 
   static collectionName() {
-    return 'location'
+    return 'punctuation'
   }
 
   scheme() {
@@ -17,10 +17,6 @@ export default class Model extends CamoModel {
         type: String,
         unique: true,
         required: true
-      },
-      tagCategory: {
-        type: String,
-        default: 'location'
       },
       isRegExp: {
         type: Boolean,
