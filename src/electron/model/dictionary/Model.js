@@ -8,23 +8,22 @@ export default class Model extends CamoModel {
   }
 
   static collectionName() {
-    return 'location'
+    return 'dictionary'
   }
 
   scheme() {
     super.schema({
       name: {
         type: String,
-        unique: true,
         required: true
       },
-      tagCategory: {
+      code: {
         type: String,
-        default: 'location'
+        required: true
       },
-      isRegExp: {
-        type: Boolean,
-        default: false
+      parentCode: {
+        type: String,
+        default: ''
       }
     })
   }

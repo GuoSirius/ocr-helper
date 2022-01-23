@@ -18,25 +18,13 @@ export default class Model extends CamoModel {
         unique: true,
         required: true
       },
+      tagCategory: {
+        type: String,
+        default: 'time'
+      },
       isRegExp: {
         type: Boolean,
         default: false
-      },
-      isSystem: {
-        type: Boolean,
-        default: false
-      },
-      createTime: {
-        type: Date,
-        default: Date.now
-      },
-      updateTime: {
-        type: Date,
-        default: Date.now
-      },
-      deleteTime: {
-        type: Date,
-        default: null
       }
     })
   }

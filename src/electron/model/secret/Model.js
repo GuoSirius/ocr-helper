@@ -15,28 +15,27 @@ export default class Model extends CamoModel {
     super.schema({
       name: {
         type: String,
-        unique: true,
         required: true
       },
-      isRegExp: {
+      category: {
+        type: String,
+        default: ''
+      },
+      appId: {
+        type: String,
+        required: true
+      },
+      apiKey: {
+        type: String,
+        required: true
+      },
+      secretKey: {
+        type: String,
+        required: true
+      },
+      isActive: {
         type: Boolean,
         default: false
-      },
-      isSystem: {
-        type: Boolean,
-        default: false
-      },
-      createTime: {
-        type: Date,
-        default: Date.now
-      },
-      updateTime: {
-        type: Date,
-        default: Date.now
-      },
-      deleteTime: {
-        type: Date,
-        default: null
       }
     })
   }
