@@ -4,8 +4,8 @@ const { spawn } = require('child_process')
 const portFinder = require('portfinder')
 
 const COMMAND_SUFFIX = process.platform === 'win32' ? '.cmd' : ''
-const CROSS_ENV_COMMAND = path.resolve(__dirname, `../node_modules/.bin/cross-env${COMMAND_SUFFIX}`)
-const VUE_DEVTOOLS_COMMAND = path.resolve(__dirname, `../node_modules/.bin/vue-devtools${COMMAND_SUFFIX}`)
+const CROSS_ENV_COMMAND = path.resolve(__dirname, `./node_modules/.bin/cross-env${COMMAND_SUFFIX}`)
+const VUE_DEVTOOLS_COMMAND = path.resolve(__dirname, `./node_modules/.bin/vue-devtools${COMMAND_SUFFIX}`)
 
 let devtoolsProcess = null
 
@@ -21,6 +21,8 @@ portFinder.getPort({ port: 8098 }, (error, port) => {
     stdio: 'ignore',
     detached: true
   })
+
+  console.log(devtoolsProcess.pid)
 
   process.exit(0)
 })

@@ -13,6 +13,10 @@ export default class Model extends CamoModel {
 
   scheme() {
     super.schema({
+      parentId: {
+        type: String,
+        default: ''
+      },
       name: {
         type: String,
         required: true
@@ -20,10 +24,6 @@ export default class Model extends CamoModel {
       code: {
         type: String,
         required: true
-      },
-      parentCode: {
-        type: String,
-        default: ''
       }
     })
   }
