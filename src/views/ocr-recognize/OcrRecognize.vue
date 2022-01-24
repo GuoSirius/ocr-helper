@@ -1,7 +1,7 @@
 <template>
   <el-container class="wrapper">
     <el-header height="auto">
-      <el-form :model="formModel" inline inline-message size="small">
+      <el-form :model="formModel" inline inline-message>
         <el-form-item label="选择文件夹:" prop="folder">
           <el-input v-model="formModel.folder" type="file" webkitdirectory></el-input>
         </el-form-item>

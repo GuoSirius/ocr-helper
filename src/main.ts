@@ -10,6 +10,7 @@ import './assets/scss/element-ui.scss'
 
 import { createApp } from 'vue'
 import ElementPlus from 'element-plus'
+import zhCN from 'element-plus/es/locale/lang/zh-cn'
 import * as icons from '@element-plus/icons-vue'
 
 import forEach from 'lodash/forEach'
@@ -25,12 +26,12 @@ if (process.env.IS_ELECTRON) {
     console.error(error)
   })
 
-  // require('./service/vue-devtools')
+  require('./service/vue-devtools')
 }
 
 const app = createApp(App)
 
-app.use(store).use(router).use(ElementPlus).mount('#app')
+app.use(store).use(router).use(ElementPlus, { locale: zhCN }).mount('#app')
 
 forEach(icons, (component: unknown, name) => {
   // @ts-expect-error unknown
