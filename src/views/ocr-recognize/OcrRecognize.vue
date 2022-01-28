@@ -14,12 +14,6 @@
 <script setup>
 import { ref } from 'vue'
 
-import { nanoid } from 'nanoid'
-
-import { addBillboard } from '@/electron/model/article'
-
-addBillboard(nanoid())
-
 const formModel = ref({
   folder: ''
 })

@@ -9,7 +9,7 @@ export function useFormModel(getDataLists) {
   if (!isFunction(getDataLists)) getDataLists = noop
 
   function resetHandler() {
-    form.value.resetFields()
+    form.value?.resetFields?.()
 
     getDataLists()
   }

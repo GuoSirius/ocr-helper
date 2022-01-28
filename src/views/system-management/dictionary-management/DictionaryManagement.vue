@@ -2,21 +2,21 @@
   <el-container class="wrapper">
     <el-header height="auto">
       <el-card>
-        <el-form ref="form" :model="formModel" inline inline-message>
+        <el-form ref="form" :model="formModel" inline>
           <el-form-item label="字典名字：" prop="name">
-            <el-input v-model="formModel.name" placeholder="请输入字典名字" />
+            <el-input v-model.trim="formModel.name" placeholder="请输入字典名字" />
           </el-form-item>
 
           <el-form-item label="字典编码：" prop="code">
-            <el-input v-model="formModel.code" placeholder="请输入字典编码" />
+            <el-input v-model.trim="formModel.code" placeholder="请输入字典编码" />
           </el-form-item>
 
           <el-form-item>
             <el-button type="primary" @click.stop="queryHandler">查询</el-button>
             <el-button type="default" @click.stop="resetHandler">重置</el-button>
 
-            <el-button type="success" icon="Plus" @click.stop="queryHandler">新增</el-button>
-            <el-button type="danger" icon="Delete" @click.stop="resetHandler">删除</el-button>
+            <el-button type="success" icon="Plus" @click.stop="addHandler">新增</el-button>
+            <!-- <el-button type="danger" icon="Delete" @click.stop="deleteHandler">删除</el-button> -->
           </el-form-item>
         </el-form>
       </el-card>
@@ -34,18 +34,23 @@
         max-height="100%"
       >
         <el-table-column type="index" label="序号" width="60" align="center" fixed />
-        <el-table-column prop="name" label="名称" width="180" align="center" />
-        <el-table-column prop="code" label="编码" width="180" align="center" />
-        <el-table-column prop="isDisabled" label="状态" align="center" />
-        <el-table-column label="操作" align="center" fixed>
-          <el-button type="danger" icon="Delete" circle></el-button>
+        <el-table-column prop="name" label="名称" min-width="160" align="center" />
+        <el-table-column prop="code" label="编码" min-width="160" align="center" />
+        <el-table-column prop="isDisabled" label="状态" width="100" align="center" />
+        <el-table-column label="操作" width="160" align="center" fixed="right" #default="{ row }">
+          <el-button type="primary" icon="Edit" circle @click="editHandler(row)"></el-button>
+          <el-popconfirm title="你确定要删除?" @confirm="deleteHandler(row)">
+            <template #reference>
+              <el-button type="danger" icon="Delete" circle></el-button>
+            </template>
+          </el-popconfirm>
         </el-table-column>
       </el-table>
     </el-main>
 
     <el-footer height="auto">
       <el-pagination
-        v-model:currentPage="currentPage"
+        v-model:current-page="currentPage"
         v-model:page-size="pageSize"
         :total="total"
         :layout="LAYOUT"
@@ -53,15 +58,23 @@
         background
       />
     </el-footer>
+
+    <add-edit-dialog v-model="isVisibleForAddEdit" :id="currentId" @success="successHandler" />
   </el-container>
 </template>
 
 <script setup>
-import { /* ref, */ reactive } from 'vue'
+import { ref, reactive } from 'vue'
 
+import { getDictionaryPaginationLists, deleteDictionary } from '@/api/dictionary'
+
+import { useGlobalProperties } from '@/use-hooks/global-properties'
 import { useFormModel } from '@/use-hooks/form-model'
 import { ROW_KEY, LAYOUT, PAGE_SIZES, useTable } from '@/use-hooks/table-pagination'
 
+import AddEditDialog from './AddEditDialog.vue'
+
+const { $message } = useGlobalProperties()
 const { form, resetHandler } = useFormModel(getDictionaryLists)
 const { tableData, currentPage, pageSize, total } = useTable(getDictionaryLists)
 
@@ -70,13 +83,56 @@ const formModel = reactive({
   code: ''
 })
 
+const currentId = ref('')
+const isVisibleForAddEdit = ref(false)
+
+getDictionaryLists()
+
+function getDictionaryLists() {
+  getDictionaryPaginationLists({ ...formModel, currentPage: currentPage.value, pageSize: pageSize.value }).then(
+    ({ code, message, data }) => {
+      if (code) return void $message.error(message)
+
+      const lists = data?.lists || []
+      const _total = data?.total || 0
+
+      tableData.value = lists
+      total.value = _total
+    }
+  )
+}
+
 function queryHandler() {
+  currentPage.value = 1
+
   getDictionaryLists()
 }
 
-function getDictionaryLists() {
-  console.log(currentPage.value)
-  console.log(formModel)
+function addHandler() {
+  isVisibleForAddEdit.value = true
+}
+
+function editHandler(row) {
+  const { id } = row
+
+  currentId.value = id
+  isVisibleForAddEdit.value = true
+}
+
+function deleteHandler(row) {
+  const { id } = row
+
+  deleteDictionary(id).then(({ code, message }) => {
+    if (code) return $message.error(message)
+
+    queryHandler()
+
+    $message.success('字典删除成功')
+  })
+}
+
+function successHandler() {
+  getDictionaryLists()
 }
 </script>
 

@@ -20,12 +20,16 @@ import './registerServiceWorker'
 import router from './router'
 import store from './store'
 
+// @ts-expect-error TypeScript
+import { registerComponent } from '@/components'
+
 if (process.env.IS_ELECTRON) {
   process.on('unhandledRejection', error => {
     /* eslint-disable-next-line no-console */
     console.error(error)
   })
 
+  require('./service/electron-log')
   require('./service/vue-devtools')
 }
 
@@ -42,3 +46,5 @@ forEach(icons, (component: unknown, name) => {
   // @ts-expect-error ComponentPublicInstance
   app.component(_name, component)
 })
+
+registerComponent(app)
