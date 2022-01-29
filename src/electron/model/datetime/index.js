@@ -6,8 +6,6 @@ import { IS_DEVELOPMENT, FAILURE_CODE, DELETED_IDS_FIELD, DELETED_COUNT_FIELD } 
 
 import Model from './Model'
 
-export * from './constant'
-
 // 新增 物品
 export async function addArticle({ name, code, parentId = '' } = {}) {
   let data = {}

@@ -33,6 +33,10 @@ export default class Model extends CamoModel {
         type: String,
         required: true
       },
+      qps: {
+        type: Number,
+        default: 1
+      },
       isActive: {
         type: Boolean,
         default: false

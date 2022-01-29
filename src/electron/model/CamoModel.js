@@ -6,11 +6,14 @@ import isInteger from 'lodash/isInteger'
 import { connect, Document } from 'camo'
 
 import { DATABASE_PATH } from './database'
+import { formatDatetime } from './utils'
 
 export const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
 export const FAILURE_CODE = 1
 export const DELETED_IDS_FIELD = 'deletedIds'
 export const DELETED_COUNT_FIELD = 'deletedCount'
+export const RESTORED_IDS_FIELD = 'restoredIds'
+export const RESTORED_COUNT_FIELD = 'restoredCount'
 
 export default class CamoModel extends Document {
   constructor(isDate = true) {
@@ -88,11 +91,17 @@ export default class CamoModel extends Document {
     const modelJSON = model.toJSON()
     const jsonResult = { [primaryKey]: modelJSON._id, ...modelJSON }
 
+    formatDatetime(jsonResult)
+
     return jsonResult
   }
 
   static toJSONList(modelLists, primaryKey = 'id') {
     const modelJSONLists = modelLists.map(model => CamoModel.toJSON(model, primaryKey))
+
+    modelJSONLists.forEach(modelJSON => {
+      formatDatetime(modelJSON)
+    })
 
     return modelJSONLists
   }
