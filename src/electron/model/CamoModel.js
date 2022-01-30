@@ -9,11 +9,6 @@ import { DATABASE_PATH } from './database'
 import { formatDatetime } from './utils'
 
 export const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
-export const FAILURE_CODE = 1
-export const DELETED_IDS_FIELD = 'deletedIds'
-export const DELETED_COUNT_FIELD = 'deletedCount'
-export const RESTORED_IDS_FIELD = 'restoredIds'
-export const RESTORED_COUNT_FIELD = 'restoredCount'
 
 export default class CamoModel extends Document {
   constructor(isDate = true) {
@@ -72,7 +67,7 @@ export default class CamoModel extends Document {
     return CamoModel.getPaginationCondition(currentPage, pageSize)
   }
 
-  static generatePagination(lists, totalRecords = 0, currentPage = 1, pageSize = 20) {
+  static generatePagination(lists = [], totalRecords = 0, currentPage = 1, pageSize = 20) {
     totalRecords = Number(totalRecords) || 0
     currentPage = Number(currentPage) || 1
     pageSize = Number(pageSize) || 20
@@ -83,8 +78,22 @@ export default class CamoModel extends Document {
     return { lists, total, totalRecords, totalPages, currentPage, pageSize }
   }
 
-  generatePagination(lists, totalRecords = 0, currentPage = 1, pageSize = 20) {
+  generatePagination(lists = [], totalRecords = 0, currentPage = 1, pageSize = 20) {
     return CamoModel.generatePagination(lists, totalRecords, currentPage, pageSize)
+  }
+
+  static getDeletedCondition(isDeleted = true) {
+    if (isDeleted === true) {
+      return { $exists: true, $nin: [null, void 0] }
+    } else if (isDeleted === false) {
+      return [{ deleteTime: { $in: [null, void 0] } }, { deleteTime: { $exists: false } }]
+    }
+
+    return null
+  }
+
+  getDeletedCondition(isDeleted = true) {
+    return CamoModel.getDeletedCondition(isDeleted)
   }
 
   static toJSON(model, primaryKey = 'id') {

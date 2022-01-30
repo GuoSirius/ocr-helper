@@ -46,7 +46,7 @@ import merge from 'lodash/merge'
 import cloneDeep from 'lodash/cloneDeep'
 import keys from 'lodash/keys'
 
-import { STATUS_LISTS, addDictionary, updateDictionary, getDictionary } from '@/api/dictionary'
+import { STATUS_LISTS, createDictionary, updateDictionary, getDictionary } from '@/api/dictionary'
 
 import { useGlobalProperties } from '@/use-hooks/global-properties'
 
@@ -112,7 +112,7 @@ function saveHandler() {
     const _message = id ? '字典更新成功' : '字典新增成功'
 
     if (id) requestPromise = updateDictionary({ ...formModel, id })
-    else requestPromise = addDictionary({ ...formModel })
+    else requestPromise = createDictionary({ ...formModel })
 
     requestPromise.then(({ code, message }) => {
       if (code) return void $message.error(message)
