@@ -28,5 +28,3 @@ export default class Model extends CamoModel {
     })
   }
 }
-
-window.Model = Model

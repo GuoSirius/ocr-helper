@@ -19,7 +19,7 @@ export async function fixParentId(modelLists, Model, pidField = 'parentId') {
 
     await Model.find(query)
   } catch (error) {
-    return Model.jsonResult(data, FAILURE_CODE, `修复PID失败：${error.message}`)
+    return Model.jsonResult(data, FAILURE_CODE, `修复 parentId 失败：${error.message}`)
   }
 }
 
