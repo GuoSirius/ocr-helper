@@ -17,6 +17,7 @@ export default class CamoModel extends Document {
     const type = isDate ? Date : Number
 
     this.path = { type: String, default: '' }
+    this.level = { type: Number, default: 0 }
 
     this.order = {
       type: Number,

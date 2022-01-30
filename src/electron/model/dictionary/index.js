@@ -20,39 +20,32 @@ export * from './constant'
 const MESSAGE = '字典'
 
 // 创建 字典
-export async function createDictionary({
-  name,
-  code,
-  parentId = '',
-  order = 0,
-  isSystem = false,
-  isDisabled = false
-} = {}) {
+export function createDictionary({ name, code, parentId = '', order = 0, isSystem = false, isDisabled = false } = {}) {
   return create({ name, code, parentId, order, isSystem, isDisabled }, Model, MESSAGE)
 }
 
 // 更新 字典
-export async function updateDictionary({ id, name, code, parentId, order, isDisabled } = {}) {
+export function updateDictionary({ id, name, code, parentId, order, isDisabled } = {}) {
   return update(id, { name, code, parentId, order, isDisabled }, Model, MESSAGE)
 }
 
 // 删除 字典
-export async function deleteDictionary(ids, isHardDelete, needPromoteChildren) {
+export function deleteDictionary(ids, isHardDelete, needPromoteChildren) {
   return softDelete(ids, isHardDelete, needPromoteChildren, Model, MESSAGE)
 }
 
 // 还原 字典
-export async function restoreDictionary(ids, needRestoreChildren, needRestoreParent) {
+export function restoreDictionary(ids, needRestoreChildren, needRestoreParent) {
   return restore(ids, needRestoreChildren, needRestoreParent, Model, MESSAGE)
 }
 
 // 获取 字典
-export async function getDictionary(id) {
+export function getDictionary(id) {
   return getDetail(id, Model, MESSAGE)
 }
 
 // 获取 字典分页列表
-export async function getDictionaryPaginationLists({
+export function getDictionaryPaginationLists({
   name,
   code,
   parnetId,
@@ -95,7 +88,7 @@ export async function getDictionaryPaginationLists({
 }
 
 // 通过 code 获取 字典列表
-export async function getDictionaryListByCode(params) {
+export function getDictionaryListByCode(params) {
   if (!isPlainObject(params)) params = { code: params }
 
   const { name, code, parnetId, isDeleted = false, isDisabled = false, needPagination = false } = params
@@ -111,7 +104,7 @@ export async function getDictionaryPaginationTree() {
 }
 
 // 通过 code 获取 字典树
-export async function getDictionaryTreeByCode(params) {
+export function getDictionaryTreeByCode(params) {
   if (!isPlainObject(params)) params = { code: params }
 
   const { name, code, parnetId, isDeleted = false, isDisabled = false, needPagination = false } = params

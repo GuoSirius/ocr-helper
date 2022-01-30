@@ -2,7 +2,7 @@ import castArray from 'lodash/castArray'
 import isInteger from 'lodash/isInteger'
 
 import { filterNil } from './utils'
-import { fixPath, fixRestoreStatus } from './process-redundant'
+import { fixPath, batchOperate, fixRestoreStatus } from './process-redundant'
 
 export const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
 export const FAILURE_CODE = 1
@@ -131,11 +131,15 @@ export async function softDelete(
 
         if (isInteger(doc)) {
           data = { lists, [DELETED_IDS_FIELD]: deletedIds, [DELETED_COUNT_FIELD]: doc }
-        } else {
-          const docs = castArray(doc)
-          lists = Model.toJSONList(docs)
 
-          const promiseLists = docs.map(async model => {
+          return Model.jsonResult(data)
+        }
+
+        const result = await batchOperate(
+          doc,
+          Model,
+          message,
+          model => {
             let promise = null
 
             if (isHardDelete) {
@@ -154,29 +158,17 @@ export async function softDelete(
 
               return isInteger(result) ? model : result
             })
-          })
+          },
+          true,
+          DELETED_IDS_FIELD,
+          DELETED_COUNT_FIELD
+        )
 
-          const settledLists = await Promise.allSettled(promiseLists)
-
-          const deletedIds = settledLists
-            .map(({ status, value }) => {
-              if (status !== 'fulfilled') return null
-
-              return value._id
-            })
-            .filter(item => item !== null)
-          const deletedCount = deletedIds.length
-
-          data = { lists, [DELETED_IDS_FIELD]: deletedIds, [DELETED_COUNT_FIELD]: deletedCount }
-
-          if (deletedCount === 0 || deletedCount !== lists.length) {
-            return Model.jsonResult(data, FAILURE_CODE, message)
-          } else if (isHardDelete && needPromoteChildren) {
-            await fixPath(docs, Model, true, true)
-          }
+        if (!result.code && isHardDelete && needPromoteChildren) {
+          await fixPath(doc, Model, true, true)
         }
 
-        return Model.jsonResult(data)
+        return result
       })
       .catch(error => {
         return Model.jsonResult(data, FAILURE_CODE, `${message}：${error.message}`)
@@ -201,7 +193,6 @@ export async function restore(
 
   let data = { lists: [], [RESTORED_IDS_FIELD]: [], [RESTORED_COUNT_FIELD]: 0 }
 
-  let lists = []
   let actionPromise = null
 
   const isBatch = Array.isArray(ids)
@@ -228,42 +219,32 @@ export async function restore(
           return Model.jsonResult(data, FAILURE_CODE, message)
         }
 
-        const docs = castArray(doc)
-        lists = Model.toJSONList(docs)
+        const result = await batchOperate(
+          doc,
+          Model,
+          message,
+          model => {
+            model.updateTime = new Date()
+            model.deleteTime = null
 
-        const promiseLists = docs.map(model => {
-          model.updateTime = new Date()
-          model.deleteTime = null
+            return model.save().then(result => {
+              if (result === null) {
+                return Promise.reject(new Error(`${message}：${model._id}`))
+              }
 
-          return model.save().then(result => {
-            if (result === null) {
-              return Promise.reject(new Error(`${message}：${model._id}`))
-            }
+              return result
+            })
+          },
+          true,
+          RESTORED_IDS_FIELD,
+          RESTORED_COUNT_FIELD
+        )
 
-            return result
-          })
-        })
-
-        const settledLists = await Promise.allSettled(promiseLists)
-
-        const restoredIds = settledLists
-          .map(({ status, value }) => {
-            if (status !== 'fulfilled') return null
-
-            return value._id
-          })
-          .filter(item => item !== null)
-        const restoredCount = restoredIds.length
-
-        data = { lists, [RESTORED_IDS_FIELD]: restoredIds, [RESTORED_COUNT_FIELD]: restoredCount }
-
-        if (restoredCount === 0 || restoredCount !== lists.length) {
-          return Model.jsonResult(data, FAILURE_CODE, message)
-        } else if (needRestoreParent) {
-          await fixRestoreStatus(docs, Model)
+        if (!result.code && needRestoreParent) {
+          await fixRestoreStatus(doc, Model)
         }
 
-        return Model.jsonResult(data)
+        return result
       })
       .catch(error => {
         return Model.jsonResult(data, FAILURE_CODE, `${message}：${error.message}`)
@@ -301,7 +282,7 @@ export async function getDetail(id, Model, message = '', useMessage = false) {
 }
 
 // 获取 列表
-export async function getLists(query, options, Model, message = '', useMessage = false) {
+export function getLists(query, options, Model, message = '', useMessage = false) {
   return getPaginationLists(query, options, false, false, Model, message, useMessage)
 }
 
