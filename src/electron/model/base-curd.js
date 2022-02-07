@@ -305,7 +305,15 @@ export async function getPaginationLists(
 
   let data = { lists: [], total: 0 }
 
-  if (needPagination) data = Model.generatePagination([], 0, currentPage, pageSize)
+  if (needPagination) {
+    const { skip, limit } = Model.getPaginationCondition(currentPage, pageSize)
+
+    options = options || {}
+    options.skip = skip
+    options.limit = limit
+
+    data = Model.generatePagination([], 0, currentPage, pageSize)
+  }
 
   try {
     await Model.connect()

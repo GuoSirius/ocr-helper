@@ -49,11 +49,10 @@ export function getDictionaryPaginationLists({
   name,
   code,
   parnetId,
-  isDeleted,
-  isDisabled,
+  isDeleted = false,
+  isDisabled = false,
   currentPage,
-  pageSize,
-  needPagination = true
+  pageSize
 } = {}) {
   const query = {
     $where() {
@@ -75,16 +74,7 @@ export function getDictionaryPaginationLists({
     query.$or.push(...Model.getDeletedCondition(false))
   }
 
-  if (needPagination) {
-    const { skip, limit } = Model.getPaginationCondition(currentPage, pageSize)
-
-    options.skip = skip
-    options.limit = limit
-
-    return getPaginationLists(query, options, currentPage, pageSize, Model, MESSAGE)
-  }
-
-  return getLists(query, options, Model, MESSAGE)
+  return getPaginationLists(query, options, currentPage, pageSize, Model, MESSAGE)
 }
 
 // 通过 code 获取 字典列表
@@ -96,8 +86,8 @@ export function getDictionaryListByCode(params) {
   return getDictionaryPaginationLists({ name, code, parnetId, isDeleted, isDisabled, needPagination })
 }
 
-// 获取 字典分页树
-export async function getDictionaryPaginationTree() {
+// 获取 字典树
+export async function getDictionaryTree() {
   await Model.connect()
 
   return Model.find({ $or: [{ deleteTime: null }, { deleteTime: { $exists: false } }] }, { sort: ['-createTime'] })
