@@ -1,5 +1,7 @@
 import castArray from 'lodash/castArray'
+import isString from 'lodash/isString'
 import isInteger from 'lodash/isInteger'
+import isPlainObject from 'lodash/isPlainObject'
 
 import { filterNil } from './utils'
 import { fixPath, batchOperate, fixRestoreStatus } from './process-redundant'
@@ -49,12 +51,14 @@ export async function update(id, params, Model, message = '', useMessage = false
 
   let data = {}
 
-  const updateData = filterNil(params)
+  let updateData = filterNil(params)
+
+  if (!isPlainObject(updateData)) updateData = {}
 
   try {
     await Model.connect()
 
-    return Model.findOneAndUpdate({ _id: id }, updateData)
+    return Model.findOneAndUpdate({ _id: id }, { ...updateData, updateTime: new Date() })
       .then(async doc => {
         if (doc === null) return Model.jsonResult(data, FAILURE_CODE, message)
 
@@ -296,6 +300,8 @@ export async function getPaginationLists(
   message = '',
   useMessage = false
 ) {
+  if (!isPlainObject(options)) options = {}
+
   const needPagination = currentPage !== false && pageSize !== false
   const paginationMessage = needPagination ? '分页' : ''
 
@@ -308,7 +314,6 @@ export async function getPaginationLists(
   if (needPagination) {
     const { skip, limit } = Model.getPaginationCondition(currentPage, pageSize)
 
-    options = options || {}
     options.skip = skip
     options.limit = limit
 
@@ -326,6 +331,69 @@ export async function getPaginationLists(
 
         if (needPagination) data = Model.generatePagination(lists, total, currentPage, pageSize)
         else data = { lists, total }
+
+        return Model.jsonResult(data)
+      })
+      .catch(error => {
+        return Model.jsonResult(data, FAILURE_CODE, `${message}：${error.message}`)
+      })
+  } catch (error) {
+    return Model.jsonResult(data, FAILURE_CODE, `${message}：${error.message}`)
+  }
+}
+
+// 通过 指定字段 获取 列表
+export async function getListByField(field, query, options, Model, message = '', useMessage = false) {
+  if (!useMessage) {
+    message = `获取字段${message}列表失败`
+  }
+
+  let data = { lists: [], total: 0 }
+
+  if (!isPlainObject(query)) {
+    if (isString(query)) query = { [field]: query }
+    else query = {}
+  }
+
+  try {
+    await Model.connect()
+
+    const total = await Model.count(query)
+
+    return Model.find(query, options)
+      .then(docs => {
+        const lists = Model.toJSONList(docs)
+
+        data = { lists, total }
+
+        return Model.jsonResult(data)
+      })
+      .catch(error => {
+        return Model.jsonResult(data, FAILURE_CODE, `${message}：${error.message}`)
+      })
+  } catch (error) {
+    return Model.jsonResult(data, FAILURE_CODE, `${message}：${error.message}`)
+  }
+}
+
+// 通过 指定字段 获取 树
+export async function getTreeByField(query, options, Model, message = '', useMessage = false) {
+  if (!useMessage) {
+    message = `获取${message}树失败`
+  }
+
+  let data = { lists: [], total: 0 }
+
+  try {
+    await Model.connect()
+
+    const total = await Model.count(query)
+
+    return Model.find(query, options)
+      .then(docs => {
+        const lists = Model.toJSONList(docs)
+
+        data = { lists, total }
 
         return Model.jsonResult(data)
       })

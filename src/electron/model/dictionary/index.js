@@ -11,7 +11,6 @@ import {
   softDelete,
   restore,
   getDetail,
-  getLists,
   getPaginationLists
 } from '../base-curd'
 
@@ -77,24 +76,41 @@ export function getDictionaryPaginationLists({
   return getPaginationLists(query, options, currentPage, pageSize, Model, MESSAGE)
 }
 
-// 通过 code 获取 字典列表
-export function getDictionaryListByCode(params) {
-  if (!isPlainObject(params)) params = { code: params }
+// 通过 parentId 获取 字典列表
+export function getDictionaryListByParentId(params) {
+  if (!isPlainObject(params)) params = { parentId: params }
 
-  const { name, code, parnetId, isDeleted = false, isDisabled = false, needPagination = false } = params
+  const { name, code, parnetId, isDeleted = false, isDisabled = false } = params
 
-  return getDictionaryPaginationLists({ name, code, parnetId, isDeleted, isDisabled, needPagination })
+  return getDictionaryPaginationLists({
+    name,
+    code,
+    parnetId,
+    isDeleted,
+    isDisabled,
+    currentPage: false,
+    pageSize: false
+  })
 }
 
 // 获取 字典树
-export async function getDictionaryTree() {
+export async function getDictionaryTree({
+  name,
+  code,
+  parnetId,
+  isDeleted = false,
+  isDisabled = false,
+  start,
+  end,
+  isAll = true
+} = {}) {
   await Model.connect()
 
   return Model.find({ $or: [{ deleteTime: null }, { deleteTime: { $exists: false } }] }, { sort: ['-createTime'] })
 }
 
-// 通过 code 获取 字典树
-export function getDictionaryTreeByCode(params) {
+// 通过 parnetId 获取 字典树
+export function getDictionaryTreeByParentId(params) {
   if (!isPlainObject(params)) params = { code: params }
 
   const { name, code, parnetId, isDeleted = false, isDisabled = false, needPagination = false } = params

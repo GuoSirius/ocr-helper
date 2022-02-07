@@ -8,6 +8,7 @@ import { FAILURE_CODE } from './base-curd'
 
 export const FIXED_IDS_FIELD = 'fixedIds'
 export const FIXED_COUNT_FIELD = 'fixedCount'
+export const PATH_PARENT_ID_FIELD = '__path-parent-id-field__'
 
 export async function batchOperate(
   modelLists,
@@ -64,7 +65,7 @@ export async function batchOperate(
   }
 }
 
-export async function fixParentId(modelLists, Model, pidField = 'parentId') {
+export async function fixParentId(modelLists, Model, pidField = 'parentId', pathPidField = PATH_PARENT_ID_FIELD) {
   let data = { lists: [], [FIXED_IDS_FIELD]: [], [FIXED_COUNT_FIELD]: 0 }
 
   modelLists = castArray(modelLists)
@@ -78,9 +79,12 @@ export async function fixParentId(modelLists, Model, pidField = 'parentId') {
     await Model.find(query)
       .then(docs => {
         return batchOperate(docs, Model, `修复 ${pidField} 失败`, doc => {
-          const { [pidField]: parentId } = modelLists.find(({ _id }) => _id === doc[pidField])
+          const { [pidField]: parentId, [pathPidField]: pathParentId } = modelLists.find(
+            ({ _id }) => _id === doc[pidField]
+          )
 
-          doc[pidField] = parentId ?? ''
+          doc[pidField] = pathParentId ?? parentId ?? ''
+          doc.updateTime = new Date()
 
           return doc.save().then(result => {
             if (result === null) {
@@ -121,13 +125,12 @@ export async function fixPath(
   modelLists = castArray(modelLists)
   const excludeIds = modelLists.map(item => item._id)
 
-  const query = {}
+  const query = { _id: { $nin: excludeIds } }
 
   try {
     await Model.connect()
 
     if (isHardDelete) {
-      query._id = { $nin: excludeIds }
       query.path = { $regex: new RegExp(`-(${excludeIds.join('|')})-`) }
 
       if (needPromoteChildren) {
@@ -143,6 +146,8 @@ export async function fixPath(
 
                 doc.path = doc.path.replace(regexp, '-')
               })
+
+              doc.updateTime = new Date()
 
               return doc.save().then(result => {
                 if (result === null) {
@@ -182,37 +187,96 @@ export async function fixPath(
       return needUpdate
     })
 
-    const promiseLists = modelLists.map(model => {
-      const { _id, parentId, path } = model
+    const result = await batchOperate(modelLists, Model, '修复路径失败', model => {
+      const { _id, [pidField]: parentId, path } = model
 
-      console.log(_id, parentId, path)
+      // 查找 最新父级
+      return Model.findOne({ _id: parentId }).then(async doc => {
+        const { _id: pid, path: parentPath } = doc || {}
 
-      let _path = ''
+        let needUpdate = false
+        let savePromise = null
 
-      if (path) {
-        // TODO
-        return Promise.reject(new Error(123))
-      } else {
-        _path = `0-${_id}`
+        model.updateTime = new Date()
 
-        Model.findOneAndUpdate({ _id }, { path: _path, updateTime: new Date() })
-      }
+        // 新增
+        if (!path) {
+          model.path = `${parentPath || 0}-${_id}`
+
+          savePromise = model.save()
+        } else if (!parentPath) {
+          // TODO 该情况理论上不会出现，待定、待优化
+          model.path = `0-${pid}-${_id}`
+
+          savePromise = model.save()
+        } else {
+          model.path = `${parentPath}-${_id}`
+
+          needUpdate = true
+          savePromise = model.save()
+        }
+
+        return savePromise.then(async result => {
+          if (result === null) {
+            return Promise.reject(new Error(`修复路径 ${model._id} 失败`))
+          }
+
+          if (!needUpdate) return model
+
+          let newPathPrefix = `${parentPath}-`
+          const oldPathPrefix = new RegExp(`^${path}-`)
+
+          if (parentPath.startsWith(path)) {
+            const [pathParentId] = path.split('-').slice(-2)
+
+            newPathPrefix = path.replace(new RegExp(`-${_id}$`), '-')
+            model[PATH_PARENT_ID_FIELD] = pathParentId
+
+            await fixParentId(model, Model, pidField)
+          }
+
+          query.path = { $regex: oldPathPrefix }
+          await Model.find(query).then(async docs => {
+            await batchOperate(docs, Model, '修复路径失败', doc => {
+              doc.path = doc.path.replace(oldPathPrefix, newPathPrefix)
+              doc.updateTime = new Date()
+
+              return doc.save()
+            })
+
+            await fixLevel(docs, Model)
+          })
+
+          return model
+        })
+      })
     })
-
-    const resultLists = await Promise.allSettled(promiseLists)
 
     await fixLevel(modelLists, Model)
 
-    return resultLists
+    return result
   } catch (error) {
     return Model.jsonResult(data, FAILURE_CODE, `修复路径失败：${error.message}`)
   }
 }
 
 export async function fixLevel(modelLists, Model) {
+  const data = { lists: [], [FIXED_IDS_FIELD]: [], [FIXED_COUNT_FIELD]: 0 }
+
   modelLists = castArray(modelLists)
 
-  console.log(modelLists, Model)
+  try {
+    return batchOperate(modelLists, Model, '修复层级失败', model => {
+      const { path } = model
+
+      model.level = String(path).split('-').length - 1
+      model.updateTime = new Date()
+
+      return model.save()
+    })
+  } catch (error) {
+    return Model.jsonResult(data, FAILURE_CODE, `修复层级失败：${error.message}`)
+  }
 }
 
 export async function fixRestoreStatus(modelLists, Model, isParent = true) {
