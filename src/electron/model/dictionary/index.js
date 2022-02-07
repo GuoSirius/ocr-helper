@@ -11,6 +11,7 @@ import {
   softDelete,
   restore,
   getDetail,
+  getTree,
   getPaginationLists
 } from '../base-curd'
 
@@ -51,7 +52,8 @@ export function getDictionaryPaginationLists({
   isDeleted = false,
   isDisabled = false,
   currentPage,
-  pageSize
+  pageSize,
+  isOnlyCondition = false
 } = {}) {
   const query = {
     $where() {
@@ -72,6 +74,8 @@ export function getDictionaryPaginationLists({
     query.$or = query.$or || []
     query.$or.push(...Model.getDeletedCondition(false))
   }
+
+  if (isOnlyCondition) return { query, options }
 
   return getPaginationLists(query, options, currentPage, pageSize, Model, MESSAGE)
 }
@@ -94,7 +98,7 @@ export function getDictionaryListByParentId(params) {
 }
 
 // 获取 字典树
-export async function getDictionaryTree({
+export function getDictionaryTree({
   name,
   code,
   parnetId,
@@ -102,18 +106,36 @@ export async function getDictionaryTree({
   isDisabled = false,
   start,
   end,
-  isAll = true
+  isLazy,
+  isConsecutive
 } = {}) {
-  await Model.connect()
+  const { query, options } = getDictionaryPaginationLists({
+    name,
+    code,
+    parnetId,
+    isDeleted,
+    isDisabled,
+    isOnlyCondition: true
+  })
 
-  return Model.find({ $or: [{ deleteTime: null }, { deleteTime: { $exists: false } }] }, { sort: ['-createTime'] })
+  return getTree(
+    query,
+    options,
+    Model,
+    MESSAGE,
+    model => {
+      // TODO
+    },
+    isLazy,
+    isConsecutive
+  )
 }
 
 // 通过 parnetId 获取 字典树
 export function getDictionaryTreeByParentId(params) {
-  if (!isPlainObject(params)) params = { code: params }
+  if (!isPlainObject(params)) params = { parentId: params }
 
-  const { name, code, parnetId, isDeleted = false, isDisabled = false, needPagination = false } = params
+  const { name, code, parnetId, isDeleted = false, isDisabled = false, start, end, isLazy, isConsecutive } = params
 
-  return getDictionaryPaginationLists({ name, code, parnetId, isDeleted, isDisabled, needPagination })
+  return getDictionaryTree({ name, code, parnetId, isDeleted, isDisabled, start, end, isLazy, isConsecutive })
 }
