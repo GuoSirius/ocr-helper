@@ -8,6 +8,7 @@ import { FAILURE_CODE } from './base-curd'
 
 export const FIXED_IDS_FIELD = 'fixedIds'
 export const FIXED_COUNT_FIELD = 'fixedCount'
+export const TOP_PARENT_ID_LISTS = ['', 0, '0']
 export const PATH_PARENT_ID_FIELD = '__path-parent-id-field__'
 
 export async function batchOperate(
@@ -178,7 +179,7 @@ export async function fixPath(
         })
     }
 
-    // 过滤掉 软删除 或者 未更新层级关系 的记录
+    // 过滤掉 未更新层级关系 的记录
     modelLists = modelLists.filter(({ [pidField]: parentId, path }) => {
       const [pid] = String(path).split('-').slice(-2)
 
@@ -205,10 +206,12 @@ export async function fixPath(
 
           savePromise = model.save()
         } else if (!parentPath) {
-          // TODO 该情况理论上不会出现，待定、待优化
-          model.path = `0-${pid}-${_id}`
+          // TODO 待优化，对最顶层节点进行 软删除 或者 恢复 时，会进入该分支
+          if (pid && !TOP_PARENT_ID_LISTS.includes(pid)) {
+            model.path = `0-${pid}-${_id}`
 
-          savePromise = model.save()
+            savePromise = model.save()
+          } else savePromise = Promise.resolve(model)
         } else {
           model.path = `${parentPath}-${_id}`
 

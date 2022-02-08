@@ -169,6 +169,8 @@ function shortcutHandler(name) {
   }
 
   .container {
+    // width: 100%;
+    // max-width: initial;
     height: calc(100% - 60px);
   }
 

@@ -16,6 +16,7 @@ reject:
   # webpack@5.x
   - sass-loader
   - stylus-loader
+  - postcss-loader # @4.3.0
 
   # ESM module
   - swiper

@@ -5,6 +5,8 @@ import 'element-plus/dist/index.css'
 import 'animate.css'
 // import './assets/buttons.css'
 
+import './assets/stylesheets/index.css'
+
 import './assets/scss/common.scss'
 import './assets/scss/element-ui.scss'
 

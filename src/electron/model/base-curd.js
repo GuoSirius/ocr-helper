@@ -352,6 +352,7 @@ export async function getTree(
   handler = noop,
   isLazy = true,
   isConsecutive = true,
+  needIncludeMyself = false,
   useMessage = false
 ) {
   if (!useMessage) {

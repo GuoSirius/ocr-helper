@@ -107,7 +107,8 @@ export function getDictionaryTree({
   start,
   end,
   isLazy,
-  isConsecutive
+  isConsecutive,
+  needIncludeMyself
 } = {}) {
   const { query, options } = getDictionaryPaginationLists({
     name,
@@ -127,7 +128,8 @@ export function getDictionaryTree({
       // TODO
     },
     isLazy,
-    isConsecutive
+    isConsecutive,
+    needIncludeMyself
   )
 }
 
@@ -135,7 +137,29 @@ export function getDictionaryTree({
 export function getDictionaryTreeByParentId(params) {
   if (!isPlainObject(params)) params = { parentId: params }
 
-  const { name, code, parnetId, isDeleted = false, isDisabled = false, start, end, isLazy, isConsecutive } = params
+  const {
+    name,
+    code,
+    parnetId,
+    isDeleted = false,
+    isDisabled = false,
+    start,
+    end,
+    isLazy,
+    isConsecutive,
+    needIncludeMyself
+  } = params
 
-  return getDictionaryTree({ name, code, parnetId, isDeleted, isDisabled, start, end, isLazy, isConsecutive })
+  return getDictionaryTree({
+    name,
+    code,
+    parnetId,
+    isDeleted,
+    isDisabled,
+    start,
+    end,
+    isLazy,
+    isConsecutive,
+    needIncludeMyself
+  })
 }
