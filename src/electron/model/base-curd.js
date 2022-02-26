@@ -352,7 +352,6 @@ export async function getTree(
   handler = noop,
   isLazy = true,
   isConsecutive = true,
-  needIncludeMyself = false,
   useMessage = false
 ) {
   if (!useMessage) {
@@ -368,6 +367,8 @@ export async function getTree(
 
   try {
     await Model.connect()
+
+    await getLists(query, options, Model, message, true)
 
     const total = await Model.count(query)
 

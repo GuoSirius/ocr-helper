@@ -17,7 +17,7 @@
       </div>
     </el-header>
 
-    <el-container class="container">
+    <el-container class="main">
       <el-aside width="240px" class="aside" :class="{ 'aside-collapsed': isCollapsed }">
         <el-scrollbar>
           <el-menu
@@ -95,7 +95,7 @@
         </el-scrollbar>
       </el-aside>
 
-      <el-main class="main">
+      <el-main class="content">
         <router-view />
       </el-main>
     </el-container>
@@ -168,7 +168,7 @@ function shortcutHandler(name) {
     }
   }
 
-  .container {
+  .main {
     // width: 100%;
     // max-width: initial;
     height: calc(100% - 60px);
@@ -194,7 +194,7 @@ function shortcutHandler(name) {
     }
   }
 
-  .main {
+  .content {
     width: 100%;
     height: 100%;
     padding: 16px 12px 6px 18px;
